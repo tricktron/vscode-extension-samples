@@ -32,6 +32,7 @@ dependencies {
 application {
     // Define the main class for the application.
     mainClass = 'ch.fhnw.thga.App'
+    applicationName 'simpleJavaLanguageServer'
 }
 
 tasks.named('test') {

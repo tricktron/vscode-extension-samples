@@ -15,7 +15,9 @@
           buildInputs = with pkgs; [
             nodejs-12_x
             gradle
+            adoptopenjdk-openj9-bin-8
           ];
         };
+        JAVA_8_HOME = "${pkgs.adoptopenjdk-openj9-bin-8}/Contents/Home";
       });
 }
