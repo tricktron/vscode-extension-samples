@@ -48,6 +48,19 @@ public class SimpleTextDocumentService implements TextDocumentService {
 	}
 
 	@Override
+	public CompletableFuture<CompletionItem> resolveCompletionItem(CompletionItem item) {
+		if (item.getData().equals(1)) {
+			item.setDetail("TypeScript details");
+			item.setDocumentation("TypeScript documentation");
+			return CompletableFuture.completedFuture(item);
+		} else {
+			item.setDetail("JavaScript details");
+			item.setDocumentation("JavaScript documentation");
+			return CompletableFuture.completedFuture(item);
+		}
+	}
+
+	@Override
 	public void didOpen(DidOpenTextDocumentParams params) {
 		String text = params.getTextDocument().getText();
 		this.docs.put(params.getTextDocument().getUri(), text);

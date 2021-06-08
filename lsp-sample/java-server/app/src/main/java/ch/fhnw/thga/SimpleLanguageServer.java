@@ -26,7 +26,9 @@ public class SimpleLanguageServer implements LanguageServer {
 	@Override
 	public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
 		final InitializeResult res = new InitializeResult(new ServerCapabilities());
-		res.getCapabilities().setCompletionProvider(new CompletionOptions());
+		CompletionOptions completionProvider = new CompletionOptions();
+		completionProvider.setResolveProvider(Boolean.TRUE);
+		res.getCapabilities().setCompletionProvider(completionProvider);
 		res.getCapabilities().setTextDocumentSync(TextDocumentSyncKind.Full);
 		return CompletableFuture.supplyAsync(() -> res);
 	}

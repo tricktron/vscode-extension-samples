@@ -59,7 +59,7 @@ export function activate(context: ExtensionContext) {
 	client = new LanguageClient(
 		'languageServerExample',
 		'Language Server Example',
-		// nodeServerOptions
+		//nodeServerOptions,
 		javaServerOptions,
 		clientOptions
 	);
