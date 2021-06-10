@@ -14,7 +14,7 @@ import {
 } from 'vscode-languageclient/node';
 
 let client: LanguageClient;
-const APP_NAME = "simpleJavaLanguageServer";
+const APP_NAME = 'simpleJavaLanguageServer';
 
 export function activate(context: ExtensionContext) {
 	// The server is implemented in node
@@ -40,9 +40,12 @@ export function activate(context: ExtensionContext) {
 	const javaLanguageServerStartScriptPath = context.asAbsolutePath(
 		path.join("java-server", "app", "build", "install", APP_NAME, "bin", APP_NAME)
 	);
+
 	let javaServerOptions: ServerOptions = {
-		run: { command: javaLanguageServerStartScriptPath },
-		debug: { command: javaLanguageServerStartScriptPath }
+		run: { command: "sh", args: [ javaLanguageServerStartScriptPath ] },
+		debug: {
+			command: "sh", args: [ javaLanguageServerStartScriptPath ], options: { env: process.env }
+		}
 	}
 
 	// Options to control the language client

@@ -1,12 +1,14 @@
 package ch.fhnw.thga;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import com.google.gson.JsonPrimitive;
 
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
@@ -18,14 +20,15 @@ import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
 public class SimpleTextDocumentService implements TextDocumentService {
 
 	private final SimpleLanguageServer simpleLanguageServer;
-	private final Map<String, String> docs = Collections.synchronizedMap(new HashMap<>());
 
 	public SimpleTextDocumentService(SimpleLanguageServer server) {
 		this.simpleLanguageServer = server;
@@ -36,6 +39,16 @@ public class SimpleTextDocumentService implements TextDocumentService {
 		item.setKind(CompletionItemKind.Text);
 		item.setData(data);
 		return item;
+	}
+
+	protected static Diagnostic mapMatchResultToDiagnostic(MatchResult res) {
+		return new Diagnostic(new Range(new Position(0, res.start()), new Position(0, res.end())), res.group() + " is all uppercase.", DiagnosticSeverity.Warning, "ex");
+	}
+
+	protected static List<Diagnostic> findUpperCaseWordsWithLengthTwoOrMore(String text) {
+		Pattern pattern = Pattern.compile("\\b[A-Z]{2,}\\b");
+		Matcher matcher = pattern.matcher(text);
+		return matcher.results().map(res -> mapMatchResultToDiagnostic(res)).collect(Collectors.toList());
 	}
 
 	@Override
@@ -49,29 +62,25 @@ public class SimpleTextDocumentService implements TextDocumentService {
 
 	@Override
 	public CompletableFuture<CompletionItem> resolveCompletionItem(CompletionItem item) {
-		if (item.getData().equals(1)) {
+		JsonPrimitive data = (JsonPrimitive) item.getData();
+		if (data.getAsInt() == 1) {
 			item.setDetail("TypeScript details");
 			item.setDocumentation("TypeScript documentation");
 			return CompletableFuture.completedFuture(item);
-		} else {
+		} else if (data.getAsInt() == 2) {
 			item.setDetail("JavaScript details");
 			item.setDocumentation("JavaScript documentation");
+			return CompletableFuture.completedFuture(item);
+		} else {
 			return CompletableFuture.completedFuture(item);
 		}
 	}
 
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params) {
-		String text = params.getTextDocument().getText();
-		this.docs.put(params.getTextDocument().getUri(), text);
-		List<Diagnostic> res = new ArrayList<>();
-		Diagnostic diagnostic = new Diagnostic();
-		diagnostic.setSeverity(DiagnosticSeverity.Information);
-		diagnostic.setMessage("Opened a text document");
-		res.add(diagnostic);
 		CompletableFuture.runAsync(() -> simpleLanguageServer.client
-				.publishDiagnostics(new PublishDiagnosticsParams(params.getTextDocument().getUri(), res)));
-
+				.publishDiagnostics(new PublishDiagnosticsParams(params.getTextDocument().getUri(),
+				findUpperCaseWordsWithLengthTwoOrMore(params.getTextDocument().getText()))));
 	}
 
 	@Override

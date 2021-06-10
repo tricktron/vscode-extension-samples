@@ -40,6 +40,7 @@ public class SimpleLanguageServer implements LanguageServer {
 
 	@Override
 	public void exit() {
+		System.exit(0);
 	}
 
 	@Override

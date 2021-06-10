@@ -1,5 +1,5 @@
 {
-  description = "try-purescript-dev-shell";
+  description = "java-language-server-dev-shell";
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
 
@@ -15,9 +15,8 @@
           buildInputs = with pkgs; [
             nodejs-12_x
             gradle
-            adoptopenjdk-openj9-bin-8
+            adoptopenjdk-openj9-bin-11
           ];
         };
-        JAVA_8_HOME = "${pkgs.adoptopenjdk-openj9-bin-8}/Contents/Home";
       });
 }
