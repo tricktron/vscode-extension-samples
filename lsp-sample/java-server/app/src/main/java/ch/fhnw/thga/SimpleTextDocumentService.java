@@ -1,12 +1,11 @@
 package ch.fhnw.thga;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import com.google.gson.JsonPrimitive;
 
@@ -41,14 +40,21 @@ public class SimpleTextDocumentService implements TextDocumentService {
 		return item;
 	}
 
-	protected static Diagnostic mapMatchResultToDiagnostic(MatchResult res) {
-		return new Diagnostic(new Range(new Position(0, res.start()), new Position(0, res.end())), res.group() + " is all uppercase.", DiagnosticSeverity.Warning, "ex");
+	protected static Diagnostic mapMatchResultToDiagnostic(int lineNumber, String match, int startCol, int endCol) {
+		return new Diagnostic(new Range(new Position(lineNumber, startCol), new Position(lineNumber, endCol)), match + " is all uppercase.", DiagnosticSeverity.Warning, "ex");
 	}
 
 	protected static List<Diagnostic> findUpperCaseWordsWithLengthTwoOrMore(String text) {
+		String[] lines = text.lines().toArray(String[]::new);
+		List<Diagnostic> res = new ArrayList<>();
 		Pattern pattern = Pattern.compile("\\b[A-Z]{2,}\\b");
-		Matcher matcher = pattern.matcher(text);
-		return matcher.results().map(res -> mapMatchResultToDiagnostic(res)).collect(Collectors.toList());
+		for (int i = 0; i < lines.length; i++) {
+			Matcher matcher = pattern.matcher(lines[i]);
+			while (matcher.find()) {
+				res.add(mapMatchResultToDiagnostic(i, matcher.group(), matcher.start(), matcher.end()));
+			}
+		}
+		return res;
 	}
 
 	@Override
