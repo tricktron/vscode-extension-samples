@@ -1,10 +1,9 @@
-out
-node_modules
-client/server
-.vscode-test
 # Ignore Gradle project-specific cache directory
 .gradle
-
 # Ignore Gradle build output directory
 build
-.direnv
+bin
+test.txt
+.settings/
+.project
+.classpath
