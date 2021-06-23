@@ -7,6 +7,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import frege.prelude.PreludeBase.TTuple2;
+import frege.run8.Thunk;
+
 import com.google.gson.JsonPrimitive;
 
 import org.eclipse.lsp4j.CompletionItem;
@@ -59,9 +62,11 @@ public class SimpleTextDocumentService implements TextDocumentService {
 
 	@Override
 	public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(CompletionParams position) {
+		TTuple2<Integer, String> tuple = Completion.complete(Thunk.lazy(42));
 		List<CompletionItem> completionItems = Arrays.asList(
 			createTextCompletionItem("TypeScript", 1),
-			createTextCompletionItem("JavaScript", 2)
+			createTextCompletionItem("JavaScript", 2),
+			createTextCompletionItem(tuple.mem2.call(), tuple.mem1.call())
 		);
 		return CompletableFuture.completedFuture(Either.forLeft(completionItems));
 	}

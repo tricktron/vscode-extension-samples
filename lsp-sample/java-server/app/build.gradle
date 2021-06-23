@@ -28,6 +28,9 @@ dependencies {
     implementation 'com.google.guava:guava:30.0-jre'
 
     implementation group: 'org.eclipse.lsp4j', name: 'org.eclipse.lsp4j', version: '0.12.0'
+
+    implementation files('libs/frege3.25.84.jar')
+
 }
 
 application {
@@ -45,4 +48,40 @@ java {
 tasks.named('test') {
     // Use junit platform for unit tests.
     useJUnitPlatform()
+}
+
+abstract class FregeTask extends JavaExec {
+    @CompileClasspath
+    abstract Property<FileCollection> getFregeCompiler()
+
+    @InputDirectory
+    abstract DirectoryProperty getFregeMainSourceDir()
+
+    @InputDirectory
+    abstract DirectoryProperty getJavaMainSourceDir()
+
+    @OutputDirectory
+    abstract DirectoryProperty getFregeOutputDir()
+}
+
+tasks.register('compileFrege', FregeTask) {
+    fregeCompiler = layout.projectDirectory.files('libs/frege3.25.84.jar')
+    fregeMainSourceDir = layout.projectDirectory.dir('src/main/frege')
+    javaMainSourceDir = layout.projectDirectory.dir('src/main/java')
+    fregeOutputDir = layout.buildDirectory.dir('classes/frege/main')
+    classpath = files fregeCompiler
+    args(["-v", "-d", "${fregeOutputDir.get()}", "-sp", "${fregeMainSourceDir.get()}", "${fregeMainSourceDir.get()}"])
+    doLast {
+        ant.move(toDir: javaMainSourceDir.get()) {
+            fileSet(dir: fregeOutputDir.get()) {
+                include name: "**/*.java"
+            }
+        }
+    }
+    description "Compiles the frege files in \$fregeMainSourceDir to .java & .class files in \$fregeOutputDir and moves the .java files to \$javaMainSourceDir"
+    group 'Frege'
+}
+
+compileJava.configure {
+    dependsOn compileFrege
 }
