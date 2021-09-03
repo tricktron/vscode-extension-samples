@@ -1,4 +1,4 @@
-# LSP Example
+# LSP Example with a Java Server and LSP4J
 
 Heavily documented sample code for https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
 
